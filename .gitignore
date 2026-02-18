@@ -35,3 +35,6 @@ openmft-*.tar
 npm-debug.log
 /assets/node_modules/
 
+# Editor/tool save files.
+save_*
+

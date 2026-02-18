@@ -35,34 +35,72 @@ defmodule OpenmftWeb.Layouts do
 
   def app(assigns) do
     ~H"""
-    <header class="navbar px-4 sm:px-6 lg:px-8">
-      <div class="flex-1">
-        <a href="/" class="flex-1 flex w-fit items-center gap-2">
-          <img src={~p"/images/logo.svg"} width="36" />
-          <span class="text-sm font-semibold">v{Application.spec(:phoenix, :vsn)}</span>
-        </a>
-      </div>
-      <nav class="flex-1">
-        <ul class="flex px-1 space-x-2 items-center">
-          <li><a href={~p"/companies"} class="btn btn-ghost btn-sm">Companies</a></li>
-          <li><a href={~p"/accounts"} class="btn btn-ghost btn-sm">Accounts</a></li>
-          <li><a href={~p"/connections"} class="btn btn-ghost btn-sm">Connections</a></li>
-        </ul>
-      </nav>
-      <div class="flex-none">
-        <ul class="flex px-1 space-x-2 items-center">
-          <li>
-            <.theme_toggle />
-          </li>
-        </ul>
-      </div>
-    </header>
+    <div class="drawer lg:drawer-open">
+      <input id="sidebar-toggle" type="checkbox" class="drawer-toggle" />
 
-    <main class="px-4 py-20 sm:px-6 lg:px-8">
-      <div class="mx-auto max-w-2xl space-y-4">
-        {render_slot(@inner_block) || @inner_content}
+      <div class="drawer-content flex flex-col">
+        <%!-- Mobile top bar --%>
+        <header class="navbar bg-base-100 border-b border-base-200 lg:hidden">
+          <div class="flex-none">
+            <label for="sidebar-toggle" class="btn btn-square btn-ghost drawer-button">
+              <.icon name="hero-bars-3" class="size-5" />
+            </label>
+          </div>
+          <div class="flex-1">
+            <span class="text-lg font-semibold">OpenMFT</span>
+          </div>
+        </header>
+
+        <main class="flex-1 p-6 lg:p-8">
+          <div class="mx-auto max-w-5xl space-y-4">
+            {render_slot(@inner_block) || @inner_content}
+          </div>
+        </main>
       </div>
-    </main>
+
+      <div class="drawer-side z-40">
+        <label for="sidebar-toggle" aria-label="close sidebar" class="drawer-overlay"></label>
+        <aside class="bg-base-200 min-h-full w-64 flex flex-col">
+          <%!-- Logo --%>
+          <div class="p-4 border-b border-base-300">
+            <a href="/" class="flex items-center gap-2">
+              <img src={~p"/images/logo.svg"} width="32" />
+              <span class="text-lg font-bold">OpenMFT</span>
+            </a>
+          </div>
+
+          <%!-- Navigation --%>
+          <nav class="flex-1 p-4">
+            <ul class="menu menu-sm gap-1">
+              <li class="menu-title text-xs uppercase tracking-wider opacity-60">Partners</li>
+              <li>
+                <a href={~p"/companies"} class="flex items-center gap-2">
+                  <.icon name="hero-building-office-2" class="size-4" /> Companies
+                </a>
+              </li>
+              <li>
+                <a href={~p"/accounts"} class="flex items-center gap-2">
+                  <.icon name="hero-user-group" class="size-4" /> Accounts
+                </a>
+              </li>
+              <li>
+                <a href={~p"/connections"} class="flex items-center gap-2">
+                  <.icon name="hero-link" class="size-4" /> Connections
+                </a>
+              </li>
+            </ul>
+          </nav>
+
+          <%!-- Footer --%>
+          <div class="p-4 border-t border-base-300">
+            <div class="flex items-center justify-between">
+              <span class="text-xs opacity-60">v{Application.spec(:phoenix, :vsn)}</span>
+              <.theme_toggle />
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
 
     <.flash_group flash={@flash} />
     """

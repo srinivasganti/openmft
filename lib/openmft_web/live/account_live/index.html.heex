@@ -9,9 +9,11 @@
   ui={@ui}
   action={:read}
   rows={@accounts}
-  row_click={fn account -> JS.patch(~p"/accounts/#{account.id}/edit") end}
+  row_click={fn account -> JS.navigate(~p"/accounts/#{account.id}") end}
 >
   <:row_action :let={account}>
+    <a href={~p"/accounts/#{account.id}"} class="btn btn-ghost btn-xs">View</a>
+    <a href={~p"/accounts/#{account.id}/edit"} class="btn btn-ghost btn-xs">Edit</a>
     <.button
       phx-click="delete"
       phx-value-id={account.id}

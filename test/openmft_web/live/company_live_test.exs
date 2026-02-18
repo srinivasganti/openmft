@@ -138,6 +138,14 @@ defmodule OpenmftWeb.CompanyLiveTest do
       assert html =~ "Updated Corp"
     end
 
+    test "shows company detail page", %{conn: conn, company: company} do
+      {:ok, _view, html} = live(conn, ~p"/companies/#{company.id}")
+
+      assert html =~ company.name
+      assert html =~ "acme@example.com"
+      assert html =~ "Accounts"
+    end
+
     test "deletes a company", %{conn: conn, company: company} do
       {:ok, view, _html} = live(conn, ~p"/companies")
 

@@ -1,0 +1,70 @@
+<.header>
+  {@company.name}
+  <:actions>
+    <.button patch={~p"/companies/#{@company.id}/edit"} variant="primary">Edit</.button>
+    <.button patch={~p"/companies"}>Back</.button>
+  </:actions>
+</.header>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+  <div class="card bg-base-200 p-4">
+    <h3 class="font-semibold mb-3">Details</h3>
+    <dl class="space-y-2 text-sm">
+      <div class="flex justify-between">
+        <dt class="opacity-60">Status</dt>
+        <dd><.badge status={@company.status} /></dd>
+      </div>
+      <div :if={@company.email} class="flex justify-between">
+        <dt class="opacity-60">Email</dt>
+        <dd>{@company.email}</dd>
+      </div>
+      <div :if={@company.phone_number} class="flex justify-between">
+        <dt class="opacity-60">Phone</dt>
+        <dd>{@company.phone_number}</dd>
+      </div>
+      <div :if={@company.billing_id} class="flex justify-between">
+        <dt class="opacity-60">Billing ID</dt>
+        <dd>{@company.billing_id}</dd>
+      </div>
+      <div :if={@company.description} class="flex justify-between">
+        <dt class="opacity-60">Description</dt>
+        <dd>{@company.description}</dd>
+      </div>
+    </dl>
+  </div>
+</div>
+
+<div class="mt-8">
+  <h3 class="font-semibold text-lg mb-4">
+    Accounts <span class="badge badge-sm badge-ghost ml-1">{length(@company.accounts)}</span>
+  </h3>
+
+  <div :if={@company.accounts == []} class="text-sm opacity-60">
+    No accounts yet. <a href={~p"/accounts/new"} class="link link-primary">Create one</a>
+  </div>
+
+  <table :if={@company.accounts != []} class="table table-zebra">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Username</th>
+        <th>Status</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr :for={account <- @company.accounts}>
+        <td>
+          <a href={~p"/accounts/#{account.id}"} class="link link-primary">
+            {account.name}
+          </a>
+        </td>
+        <td>{account.username}</td>
+        <td><.badge status={account.status} /></td>
+        <td>
+          <a href={~p"/accounts/#{account.id}/edit"} class="btn btn-ghost btn-xs">Edit</a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

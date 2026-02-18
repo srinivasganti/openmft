@@ -9,9 +9,10 @@
   ui={@ui}
   action={:read}
   rows={@connections}
-  row_click={fn connection -> JS.patch(~p"/connections/#{connection.id}/edit") end}
+  row_click={fn connection -> JS.navigate(~p"/connections/#{connection.id}/edit") end}
 >
   <:row_action :let={connection}>
+    <a href={~p"/connections/#{connection.id}/edit"} class="btn btn-ghost btn-xs">Edit</a>
     <.button
       phx-click="delete"
       phx-value-id={connection.id}

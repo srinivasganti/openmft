@@ -23,10 +23,12 @@ defmodule OpenmftWeb.Router do
       live "/companies", CompanyLive.Index, :index
       live "/companies/new", CompanyLive.Index, :new
       live "/companies/:id/edit", CompanyLive.Index, :edit
+      live "/companies/:id", CompanyLive.Show, :show
 
       live "/accounts", AccountLive.Index, :index
       live "/accounts/new", AccountLive.Index, :new
       live "/accounts/:id/edit", AccountLive.Index, :edit
+      live "/accounts/:id", AccountLive.Show, :show
 
       live "/connections", ConnectionLive.Index, :index
       live "/connections/new", ConnectionLive.Index, :new

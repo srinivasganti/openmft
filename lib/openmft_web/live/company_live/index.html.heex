@@ -14,9 +14,11 @@
   sort={@sort}
   search_term={@search_term}
   on_search="search"
-  row_click={fn company -> JS.patch(~p"/companies/#{company.id}/edit") end}
+  row_click={fn company -> JS.navigate(~p"/companies/#{company.id}") end}
 >
   <:row_action :let={company}>
+    <a href={~p"/companies/#{company.id}"} class="btn btn-ghost btn-xs">View</a>
+    <a href={~p"/companies/#{company.id}/edit"} class="btn btn-ghost btn-xs">Edit</a>
     <.button
       phx-click="delete"
       phx-value-id={company.id}

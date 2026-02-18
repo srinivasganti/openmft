@@ -80,6 +80,31 @@ defmodule OpenmftWeb.CoreComponents do
   end
 
   @doc """
+  Renders a status badge using daisyUI badge classes.
+
+  ## Examples
+
+      <.badge status={:active} />
+      <.badge status={:inactive} />
+  """
+  attr :status, :atom, required: true
+
+  def badge(assigns) do
+    {label, color} = badge_style(assigns.status)
+    assigns = assign(assigns, label: label, color: color)
+
+    ~H"""
+    <span class={["badge badge-sm", @color]}>{@label}</span>
+    """
+  end
+
+  defp badge_style(:active), do: {"Active", "badge-success"}
+  defp badge_style(:inactive), do: {"Inactive", "badge-warning"}
+  defp badge_style(:suspended), do: {"Suspended", "badge-error"}
+  defp badge_style(:disabled), do: {"Disabled", "badge-warning"}
+  defp badge_style(status), do: {status |> to_string() |> String.capitalize(), "badge-ghost"}
+
+  @doc """
   Renders a button with navigation support.
 
   ## Examples

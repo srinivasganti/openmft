@@ -1,0 +1,69 @@
+<.header>
+  {@account.name}
+  <:actions>
+    <.button patch={~p"/accounts/#{@account.id}/edit"} variant="primary">Edit</.button>
+    <.button patch={~p"/accounts"}>Back</.button>
+  </:actions>
+</.header>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+  <div class="card bg-base-200 p-4">
+    <h3 class="font-semibold mb-3">Details</h3>
+    <dl class="space-y-2 text-sm">
+      <div class="flex justify-between">
+        <dt class="opacity-60">Company</dt>
+        <dd>
+          <a href={~p"/companies/#{@account.company.id}"} class="link link-primary">
+            {@account.company.name}
+          </a>
+        </dd>
+      </div>
+      <div class="flex justify-between">
+        <dt class="opacity-60">Status</dt>
+        <dd><.badge status={@account.status} /></dd>
+      </div>
+      <div :if={@account.username} class="flex justify-between">
+        <dt class="opacity-60">Username</dt>
+        <dd>{@account.username}</dd>
+      </div>
+    </dl>
+  </div>
+</div>
+
+<div class="mt-8">
+  <h3 class="font-semibold text-lg mb-4">
+    Connections
+    <span class="badge badge-sm badge-ghost ml-1">{length(@account.connections)}</span>
+  </h3>
+
+  <div :if={@account.connections == []} class="text-sm opacity-60">
+    No connections yet. <a href={~p"/connections/new"} class="link link-primary">Create one</a>
+  </div>
+
+  <table :if={@account.connections != []} class="table table-zebra">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Protocol</th>
+        <th>Host</th>
+        <th>Port</th>
+        <th>Enabled</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr :for={conn <- @account.connections}>
+        <td>{conn.name}</td>
+        <td><span class="badge badge-sm badge-outline">{conn.protocol}</span></td>
+        <td>{conn.host}</td>
+        <td>{conn.port}</td>
+        <td>
+          <input type="checkbox" class="checkbox checkbox-sm" checked={conn.enabled} disabled />
+        </td>
+        <td>
+          <a href={~p"/connections/#{conn.id}/edit"} class="btn btn-ghost btn-xs">Edit</a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

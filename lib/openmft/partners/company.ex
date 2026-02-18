@@ -9,7 +9,15 @@ defmodule Openmft.Partners.Company do
   end
 
   actions do
-    defaults [:read, :destroy, create: :*, update: :*]
+    defaults [:read, :destroy]
+
+    create :create do
+      accept [:name, :description, :status, :email, :phone_number, :billing_id]
+    end
+
+    update :update do
+      accept [:name, :description, :status, :email, :phone_number, :billing_id]
+    end
   end
 
   attributes do
@@ -33,8 +41,31 @@ defmodule Openmft.Partners.Company do
       description "The company status."
     end
 
+    attribute :email, :string do
+      public? true
+      description "The company contact email."
+    end
+
+    attribute :phone_number, :string do
+      public? true
+      description "The company phone number."
+    end
+
+    attribute :billing_id, :string do
+      public? true
+      description "The company billing identifier."
+    end
+
+    attribute :modified_by, :string do
+      public? true
+      description "The user who last modified this record."
+    end
+
     create_timestamp :inserted_at
-    update_timestamp :updated_at
+
+    update_timestamp :updated_at do
+      public? true
+    end
   end
 
   relationships do

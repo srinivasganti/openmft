@@ -34,21 +34,44 @@ defmodule OpenmftWeb.UiComponents do
   attr :rows, :list, required: true
   attr :id, :string, default: nil
   attr :row_click, :any, default: nil
+  attr :visible_columns, :list, default: nil
+  attr :all_columns, :list, default: nil
 
   slot :row_action, doc: "per-row action buttons"
 
   def ui_data_table(assigns) do
     config = Info.data_table_for(assigns.ui, assigns.action)
-    columns = display_columns(config)
+
+    display_names =
+      if assigns.visible_columns do
+        assigns.visible_columns
+      else
+        config.default_display
+      end
+
+    columns = Enum.map(display_names, fn name -> Map.fetch!(config.columns, name) end)
     id = assigns.id || "#{assigns.action}-table"
+
+    all_column_structs =
+      if assigns.all_columns do
+        Enum.map(assigns.all_columns, fn name -> Map.fetch!(config.columns, name) end)
+      else
+        nil
+      end
 
     assigns =
       assigns
       |> assign(:config, config)
       |> assign(:columns, columns)
       |> assign(:id, id)
+      |> assign(:all_column_structs, all_column_structs)
 
     ~H"""
+    <.column_toggle_dropdown
+      :if={@all_column_structs}
+      all_columns={@all_column_structs}
+      visible_columns={@visible_columns}
+    />
     <table class={["table table-zebra", @config.class]}>
       <thead>
         <tr>
@@ -79,9 +102,36 @@ defmodule OpenmftWeb.UiComponents do
     """
   end
 
-  defp display_columns(config) do
-    config.default_display
-    |> Enum.map(fn name -> Map.fetch!(config.columns, name) end)
+  attr :all_columns, :list, required: true
+  attr :visible_columns, :list, required: true
+
+  defp column_toggle_dropdown(assigns) do
+    ~H"""
+    <div class="dropdown dropdown-end mb-2">
+      <div tabindex="0" role="button" class="btn btn-sm btn-outline">
+        Show Columns
+      </div>
+      <ul tabindex="0" class="dropdown-content menu bg-base-200 rounded-box z-10 w-56 p-2 shadow-sm">
+        <li :for={col <- @all_columns}>
+          <label class="label cursor-pointer justify-start gap-2">
+            <input
+              type="checkbox"
+              class="checkbox checkbox-sm"
+              checked={col.name in @visible_columns}
+              phx-click="toggle-column"
+              phx-value-column={col.name}
+            />
+            <span>{col.label}</span>
+          </label>
+        </li>
+        <li class="mt-2 border-t border-base-300 pt-2">
+          <button type="button" phx-click="restore-default-columns" class="btn btn-xs btn-ghost">
+            Restore Default View
+          </button>
+        </li>
+      </ul>
+    </div>
+    """
   end
 
   defp resolve_column_value(row, column) do

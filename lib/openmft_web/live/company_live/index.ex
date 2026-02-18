@@ -3,19 +3,22 @@ defmodule OpenmftWeb.CompanyLive.Index do
 
   alias Openmft.Partners
   alias Openmft.Partners.Company
+  alias OpenmftWeb.ColumnToggle
 
   @ui Company.Page
 
   @impl true
   def mount(_params, _session, socket) do
     companies = Ash.read!(Company, action: :read)
+    column_assigns = ColumnToggle.init(@ui, :read)
 
     {:ok,
      socket
      |> assign(:page_title, "Companies")
      |> assign(:ui, @ui)
      |> assign(:companies, companies)
-     |> assign(:company, nil)}
+     |> assign(:company, nil)
+     |> assign(column_assigns)}
   end
 
   @impl true
@@ -94,6 +97,26 @@ defmodule OpenmftWeb.CompanyLive.Index do
      socket
      |> put_flash(:info, "Company deleted")
      |> assign(:companies, companies)}
+  end
+
+  @impl true
+  def handle_event("toggle-column", %{"column" => column}, socket) do
+    column = String.to_existing_atom(column)
+
+    visible =
+      ColumnToggle.toggle(
+        socket.assigns.visible_columns,
+        socket.assigns.all_columns,
+        column
+      )
+
+    {:noreply, assign(socket, :visible_columns, visible)}
+  end
+
+  @impl true
+  def handle_event("restore-default-columns", _params, socket) do
+    visible = ColumnToggle.restore_defaults(@ui, :read)
+    {:noreply, assign(socket, :visible_columns, visible)}
   end
 
   defp company_saved_message(:create), do: "Company created"

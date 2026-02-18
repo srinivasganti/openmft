@@ -8,7 +8,12 @@ defmodule OpenmftWeb.CompanyLiveTest do
   defp create_company(_context) do
     company =
       Company
-      |> Ash.Changeset.for_create(:create, %{name: "Acme Corp", description: "A test company"})
+      |> Ash.Changeset.for_create(:create, %{
+        name: "Acme Corp",
+        description: "A test company",
+        email: "acme@example.com",
+        phone_number: "555-0100"
+      })
       |> Ash.create!()
 
     %{company: company}
@@ -25,11 +30,52 @@ defmodule OpenmftWeb.CompanyLiveTest do
 
     setup [:create_company]
 
-    test "lists companies in data table", %{conn: conn, company: company} do
+    test "lists companies with default visible columns", %{conn: conn, company: company} do
       {:ok, _view, html} = live(conn, ~p"/companies")
 
+      # Default visible: name, email, phone_number, updated_at
       assert html =~ company.name
-      assert html =~ "A test company"
+      assert html =~ "acme@example.com"
+      assert html =~ "555-0100"
+
+      # Hidden by default: description, billing_id, modified_by, status
+      refute html =~ "A test company"
+    end
+
+    test "toggles a column on", %{conn: conn} do
+      {:ok, view, _html} = live(conn, ~p"/companies")
+
+      # Description is hidden by default
+      refute render(view) =~ "A test company"
+
+      # Toggle description on
+      view |> element(~s|input[phx-value-column="description"]|) |> render_click()
+
+      assert render(view) =~ "A test company"
+    end
+
+    test "toggles a column off", %{conn: conn} do
+      {:ok, view, _html} = live(conn, ~p"/companies")
+
+      # Email is visible by default
+      assert render(view) =~ "acme@example.com"
+
+      # Toggle email off
+      view |> element(~s|input[phx-value-column="email"]|) |> render_click()
+
+      refute render(view) =~ "acme@example.com"
+    end
+
+    test "restores default columns", %{conn: conn} do
+      {:ok, view, _html} = live(conn, ~p"/companies")
+
+      # Toggle email off
+      view |> element(~s|input[phx-value-column="email"]|) |> render_click()
+      refute render(view) =~ "acme@example.com"
+
+      # Restore defaults
+      view |> element(~s|button[phx-click="restore-default-columns"]|) |> render_click()
+      assert render(view) =~ "acme@example.com"
     end
 
     test "navigates to new company form", %{conn: conn} do
@@ -48,14 +94,16 @@ defmodule OpenmftWeb.CompanyLiveTest do
       {:ok, view, _html} = live(conn, ~p"/companies/new")
 
       view
-      |> form("#create-form", form: %{name: "New Co", description: "Brand new"})
+      |> form("#create-form",
+        form: %{name: "New Co", description: "Brand new", email: "new@example.com"}
+      )
       |> render_submit()
 
       assert_patch(view, ~p"/companies")
 
       html = render(view)
       assert html =~ "New Co"
-      assert html =~ "Brand new"
+      assert html =~ "new@example.com"
     end
 
     test "validates form on change", %{conn: conn} do

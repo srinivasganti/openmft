@@ -9,6 +9,8 @@
   ui={@ui}
   action={:read}
   rows={@companies}
+  visible_columns={@visible_columns}
+  all_columns={@all_columns}
   row_click={fn company -> JS.patch(~p"/companies/#{company.id}/edit") end}
 >
   <:row_action :let={company}>

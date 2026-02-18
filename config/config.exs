@@ -46,6 +46,7 @@ config :spark,
   ]
 
 config :openmft,
+  ash_domains: [Openmft.Partners],
   ecto_repos: [Openmft.Repo],
   generators: [timestamp_type: :utc_datetime]
 

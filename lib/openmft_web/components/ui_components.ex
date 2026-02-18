@@ -219,13 +219,26 @@ defmodule OpenmftWeb.UiComponents do
   end
 
   defp resolve_column_value(row, column) do
-    Enum.reduce(column.source, row, fn key, acc ->
-      case acc do
-        %{} -> Map.get(acc, key)
-        _ -> nil
-      end
-    end)
+    value =
+      Enum.reduce(column.source, row, fn key, acc ->
+        case acc do
+          %{} -> Map.get(acc, key)
+          _ -> nil
+        end
+      end)
+
+    format_value(value)
   end
+
+  defp format_value(%DateTime{} = dt) do
+    Calendar.strftime(dt, "%b %d, %Y %I:%M %p")
+  end
+
+  defp format_value(%NaiveDateTime{} = dt) do
+    Calendar.strftime(dt, "%b %d, %Y %I:%M %p")
+  end
+
+  defp format_value(value), do: value
 
   # ---------------------------------------------------------------------------
   # Form

@@ -30,10 +30,24 @@ defmodule Openmft.Ui.Form.Field do
         required: true,
         type: :atom
       ],
+      option_label: [
+        default: :name,
+        doc:
+          "The attribute on the destination resource to use as the display label for relationship selects.",
+        type: :atom
+      ],
+      options: [
+        doc: "Static options list for select fields, e.g. [{\"Active\", :active}].",
+        type: {:list, :any}
+      ],
       path: [
         default: [],
         doc: "Append to the root path (nested paths are appended).",
         type: {:list, :atom}
+      ],
+      relationship: [
+        doc: "The belongs_to relationship name for relationship selects.",
+        type: :atom
       ],
       type: [
         default: :default,

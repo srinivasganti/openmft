@@ -139,6 +139,7 @@ defmodule Openmft.Ui.Dsl.Transformers.MergeFormActions do
         field
         |> Map.put(:path, maybe_append_path(root_path, field.path))
         |> Map.put(:label, field.label || default_label(field))
+        |> detect_select_type(context.resource)
 
       %FieldGroup{} = group ->
         group_path = maybe_append_path(root_path, group.path)
@@ -148,6 +149,51 @@ defmodule Openmft.Ui.Dsl.Transformers.MergeFormActions do
         |> Map.put(:label, group.label || default_label(group))
         |> Map.put(:fields, merge_fields(group.fields, context, group_path))
     end)
+  end
+
+  defp detect_select_type(%Field{type: type} = field, _resource) when type != :default do
+    field
+  end
+
+  defp detect_select_type(%Field{options: options} = field, _resource)
+       when is_list(options) and options != [] do
+    %{field | type: :select}
+  end
+
+  defp detect_select_type(%Field{name: name} = field, resource) do
+    cond do
+      rel = find_belongs_to_for_field(resource, name) ->
+        %{field | type: :select, relationship: rel.name}
+
+      enum_opts = get_enum_options(resource, name) ->
+        %{field | type: :select, options: enum_opts}
+
+      true ->
+        field
+    end
+  end
+
+  defp find_belongs_to_for_field(resource, field_name) do
+    resource
+    |> Resource.Info.relationships()
+    |> Enum.find(fn
+      %Ash.Resource.Relationships.BelongsTo{source_attribute: src} -> src == field_name
+      _ -> false
+    end)
+  end
+
+  defp get_enum_options(resource, field_name) do
+    case Resource.Info.attribute(resource, field_name) do
+      %{type: Ash.Type.Atom, constraints: constraints} ->
+        case Keyword.get(constraints, :one_of) do
+          nil -> nil
+          [] -> nil
+          values -> Enum.map(values, fn v -> {default_label(v), v} end)
+        end
+
+      _ ->
+        nil
+    end
   end
 
   defp expand_action_description(action, resource_action, context) do

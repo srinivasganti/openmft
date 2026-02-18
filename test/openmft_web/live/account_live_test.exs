@@ -53,8 +53,12 @@ defmodule OpenmftWeb.AccountLiveTest do
       assert html =~ "New Account"
     end
 
-    test "creates a new account", %{conn: conn, company: company} do
+    test "creates a new account via dropdown selection", %{conn: conn, company: company} do
       {:ok, view, _html} = live(conn, ~p"/accounts/new")
+
+      html = render(view)
+      assert html =~ "Select..."
+      assert html =~ company.name
 
       view
       |> form("#create-form",

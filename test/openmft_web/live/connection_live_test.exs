@@ -64,8 +64,12 @@ defmodule OpenmftWeb.ConnectionLiveTest do
       assert html =~ "New Connection"
     end
 
-    test "creates a new connection", %{conn: conn, account: account} do
+    test "creates a new connection via dropdown selection", %{conn: conn, account: account} do
       {:ok, view, _html} = live(conn, ~p"/connections/new")
+
+      html = render(view)
+      assert html =~ "Select..."
+      assert html =~ account.name
 
       view
       |> form("#create-form",

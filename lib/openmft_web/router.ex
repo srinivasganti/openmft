@@ -19,17 +19,19 @@ defmodule OpenmftWeb.Router do
 
     get "/", PageController, :home
 
-    live "/companies", CompanyLive.Index, :index
-    live "/companies/new", CompanyLive.Index, :new
-    live "/companies/:id/edit", CompanyLive.Index, :edit
+    live_session :partners, layout: {OpenmftWeb.Layouts, :app} do
+      live "/companies", CompanyLive.Index, :index
+      live "/companies/new", CompanyLive.Index, :new
+      live "/companies/:id/edit", CompanyLive.Index, :edit
 
-    live "/accounts", AccountLive.Index, :index
-    live "/accounts/new", AccountLive.Index, :new
-    live "/accounts/:id/edit", AccountLive.Index, :edit
+      live "/accounts", AccountLive.Index, :index
+      live "/accounts/new", AccountLive.Index, :new
+      live "/accounts/:id/edit", AccountLive.Index, :edit
 
-    live "/connections", ConnectionLive.Index, :index
-    live "/connections/new", ConnectionLive.Index, :new
-    live "/connections/:id/edit", ConnectionLive.Index, :edit
+      live "/connections", ConnectionLive.Index, :index
+      live "/connections/new", ConnectionLive.Index, :new
+      live "/connections/:id/edit", ConnectionLive.Index, :edit
+    end
   end
 
   # Other scopes may use custom stacks.

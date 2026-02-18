@@ -58,9 +58,18 @@ defmodule Openmft.Ui.Dsl do
     ],
     verifiers: [
       __MODULE__.Verifiers.DataTable.NoDuplicateActions,
+      __MODULE__.Verifiers.DataTable.NoDuplicateColumnLabels,
+      __MODULE__.Verifiers.DataTable.AllColumnsValid,
+      __MODULE__.Verifiers.DataTable.AllPublicIncluded,
+      __MODULE__.Verifiers.DataTable.DefaultSortsValid,
+      __MODULE__.Verifiers.DataTable.DefaultDisplaysValid,
       __MODULE__.Verifiers.Form.AllFieldsInAction,
+      __MODULE__.Verifiers.Form.AllAcceptedIncluded,
+      __MODULE__.Verifiers.Form.AllArgumentsIncluded,
       __MODULE__.Verifiers.Form.NoDuplicateActions,
-      __MODULE__.Verifiers.Form.NoDuplicateFields
+      __MODULE__.Verifiers.Form.NoDuplicateFields,
+      __MODULE__.Verifiers.Form.NoDuplicateFieldLabels,
+      __MODULE__.Verifiers.Form.ExactlyOneAutofocus
     ],
     persisters: [
       __MODULE__.Persisters.DataTable

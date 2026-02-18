@@ -12,6 +12,10 @@ defmodule Openmft.Partners.Connection do
     end
   end
 
+  actions do
+    defaults [:read, :destroy, create: :*, update: :*]
+  end
+
   attributes do
     uuid_primary_key :id
 
@@ -54,9 +58,5 @@ defmodule Openmft.Partners.Connection do
       public? true
       allow_nil? false
     end
-  end
-
-  actions do
-    defaults [:read, :destroy, create: :*, update: :*]
   end
 end

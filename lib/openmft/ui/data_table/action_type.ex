@@ -18,6 +18,10 @@ defmodule Openmft.Ui.DataTable.ActionType do
         doc: "The columns to display by default.",
         type: {:list, :atom}
       ],
+      default_sort: [
+        doc: "The default sort for this data table.",
+        type: Openmft.Dsl.Type.sort()
+      ],
       description: [
         doc: "The description for this data table.",
         type: Openmft.Dsl.Type.inheritable(:string)

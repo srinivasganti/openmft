@@ -8,6 +8,10 @@ defmodule Openmft.Partners.Company do
     repo Openmft.Repo
   end
 
+  actions do
+    defaults [:read, :destroy, create: :*, update: :*]
+  end
+
   attributes do
     uuid_primary_key :id
 
@@ -35,9 +39,5 @@ defmodule Openmft.Partners.Company do
 
   relationships do
     has_many :accounts, Openmft.Partners.Account
-  end
-
-  actions do
-    defaults [:read, :destroy, create: :*, update: :*]
   end
 end

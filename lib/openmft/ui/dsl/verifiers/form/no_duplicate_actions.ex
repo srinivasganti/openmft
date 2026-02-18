@@ -18,8 +18,7 @@ defmodule Openmft.Ui.Dsl.Verifiers.Form.NoDuplicateActions do
 
     for {_field, extractor, error_msg} <- [
           {:name, & &1.name, fn name, count -> "#{inspect(name)} is defined #{count} times" end},
-          {:label, & &1.label,
-           fn label, count -> "#{count} actions share the label #{label}" end}
+          {:label, & &1.label, fn label, count -> "#{count} actions share the label #{label}" end}
         ] do
       actions
       |> Enum.frequencies_by(extractor)

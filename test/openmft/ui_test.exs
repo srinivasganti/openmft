@@ -28,6 +28,8 @@ defmodule Openmft.UiTest do
         default :active
         constraints one_of: [:active, :inactive]
       end
+
+      attribute :internal_notes, :string
     end
 
     relationships do
@@ -75,12 +77,39 @@ defmodule Openmft.UiTest do
     end
   end
 
+  defmodule TestProject do
+    use Ash.Resource, domain: Openmft.UiTest.TestDomain, data_layer: Ash.DataLayer.Ets
+
+    attributes do
+      uuid_primary_key :id
+
+      attribute :title, :string do
+        public? true
+        allow_nil? false
+      end
+    end
+
+    actions do
+      create :create do
+        accept [:title]
+        argument :note, :string, allow_nil?: false
+      end
+
+      update :update do
+        accept [:title]
+      end
+
+      defaults [:read, :destroy]
+    end
+  end
+
   defmodule TestDomain do
     use Ash.Domain
 
     resources do
       resource TestCompany
       resource TestAccount
+      resource TestProject
     end
   end
 
@@ -105,10 +134,10 @@ defmodule Openmft.UiTest do
 
     data_table do
       action_type :read do
-        exclude [:id]
-        column :name
-        column :description
-        column :status
+        exclude([:id])
+        column(:name)
+        column(:description)
+        column(:status)
       end
     end
   end
@@ -134,10 +163,10 @@ defmodule Openmft.UiTest do
 
     data_table do
       action :read do
-        exclude [:id, :company_id, :company]
-        column :name
-        column :username
-        column :status
+        exclude([:id, :company_id, :company])
+        column(:name)
+        column(:username)
+        column(:status)
       end
     end
   end
@@ -286,6 +315,136 @@ defmodule Openmft.UiTest do
       assert output =~ "field :not_real is not an accepted attribute or argument for this action"
     end
 
+    test "detect duplicate field labels" do
+      output =
+        capture_io(:stderr, fn ->
+          defmodule DuplicateFieldLabels do
+            use Openmft.Ui, resource: TestCompany
+
+            form do
+              action :create do
+                field :name, autofocus: true
+                field :description, label: "Name"
+                field :status
+              end
+
+              action :update do
+                field :name, autofocus: true
+                field :description
+                field :status
+              end
+            end
+          end
+        end)
+
+      assert output =~ "[Openmft.UiTest.DuplicateFieldLabels]"
+      assert output =~ "form -> action -> create"
+      assert output =~ "2 fields use the label"
+    end
+
+    test "detect missing accepted attribute" do
+      output =
+        capture_io(:stderr, fn ->
+          defmodule MissingAccepted do
+            use Openmft.Ui, resource: TestCompany
+
+            form do
+              action :create do
+                field :name, autofocus: true
+                field :status
+              end
+
+              action :update do
+                field :name, autofocus: true
+                field :description
+                field :status
+              end
+            end
+          end
+        end)
+
+      assert output =~ "[Openmft.UiTest.MissingAccepted]"
+      assert output =~ "form -> action -> create"
+      assert output =~ "accepted attribute :description is not a form field"
+    end
+
+    test "detect missing argument" do
+      output =
+        capture_io(:stderr, fn ->
+          defmodule MissingArgument do
+            use Openmft.Ui, resource: TestProject
+
+            form do
+              action :create do
+                field :title, autofocus: true
+              end
+
+              action :update do
+                field :title, autofocus: true
+              end
+            end
+          end
+        end)
+
+      assert output =~ "[Openmft.UiTest.MissingArgument]"
+      assert output =~ "form -> action -> create"
+      assert output =~ "argument :note is not a form field"
+    end
+
+    test "detect no autofocus" do
+      output =
+        capture_io(:stderr, fn ->
+          defmodule NoAutofocus do
+            use Openmft.Ui, resource: TestCompany
+
+            form do
+              action :create do
+                field :name
+                field :description
+                field :status
+              end
+
+              action :update do
+                field :name, autofocus: true
+                field :description
+                field :status
+              end
+            end
+          end
+        end)
+
+      assert output =~ "[Openmft.UiTest.NoAutofocus]"
+      assert output =~ "form -> action -> create"
+      assert output =~ "exactly one field must have autofocus"
+    end
+
+    test "detect multiple autofocus" do
+      output =
+        capture_io(:stderr, fn ->
+          defmodule MultipleAutofocus do
+            use Openmft.Ui, resource: TestCompany
+
+            form do
+              action :create do
+                field :name, autofocus: true
+                field :description, autofocus: true
+                field :status
+              end
+
+              action :update do
+                field :name, autofocus: true
+                field :description
+                field :status
+              end
+            end
+          end
+        end)
+
+      assert output =~ "[Openmft.UiTest.MultipleAutofocus]"
+      assert output =~ "form -> action -> create"
+      assert output =~ "exactly one field must have autofocus"
+    end
+
     test "detect duplicate fields" do
       output =
         capture_io(:stderr, fn ->
@@ -324,17 +483,17 @@ defmodule Openmft.UiTest do
 
             data_table do
               action :read do
-                exclude [:id]
-                column :name
-                column :description
-                column :status
+                exclude([:id])
+                column(:name)
+                column(:description)
+                column(:status)
               end
 
               action :read do
-                exclude [:id]
-                column :name
-                column :description
-                column :status
+                exclude([:id])
+                column(:name)
+                column(:description)
+                column(:status)
               end
             end
           end
@@ -343,6 +502,163 @@ defmodule Openmft.UiTest do
       assert output =~ "[Openmft.UiTest.DuplicateDataTableActions]"
       assert output =~ "data_table -> action"
       assert output =~ ":read is defined 2 times"
+    end
+
+    test "detect duplicate column labels" do
+      output =
+        capture_io(:stderr, fn ->
+          defmodule DuplicateColumnLabels do
+            use Openmft.Ui, resource: TestCompany
+
+            data_table do
+              action :read do
+                exclude([:id])
+                column(:name)
+                column(:description, label: "Name")
+                column(:status)
+              end
+            end
+          end
+        end)
+
+      assert output =~ "[Openmft.UiTest.DuplicateColumnLabels]"
+      assert output =~ "data_table -> action -> read"
+      assert output =~ "2 columns use the label"
+    end
+
+    test "detect invalid column source" do
+      output =
+        capture_io(:stderr, fn ->
+          defmodule InvalidColumn do
+            use Openmft.Ui, resource: TestCompany
+
+            data_table do
+              action :read do
+                exclude([:id, :description])
+                column(:name)
+                column(:bogus)
+                column(:status)
+              end
+            end
+          end
+        end)
+
+      assert output =~ "[Openmft.UiTest.InvalidColumn]"
+      assert output =~ "data_table -> action -> read -> columns"
+      assert output =~ "does not exist on"
+    end
+
+    test "detect private column source" do
+      output =
+        capture_io(:stderr, fn ->
+          defmodule PrivateColumn do
+            use Openmft.Ui, resource: TestCompany
+
+            data_table do
+              action :read do
+                exclude([:id])
+                column(:name)
+                column(:description)
+                column(:status)
+                column(:notes, source: [:internal_notes])
+              end
+            end
+          end
+        end)
+
+      assert output =~ "[Openmft.UiTest.PrivateColumn]"
+      assert output =~ "data_table -> action -> read -> columns"
+      assert output =~ "is not public on"
+    end
+
+    test "detect missing public columns" do
+      output =
+        capture_io(:stderr, fn ->
+          defmodule MissingPublic do
+            use Openmft.Ui, resource: TestCompany
+
+            data_table do
+              action :read do
+                exclude([:id])
+                column(:name)
+                column(:status)
+              end
+            end
+          end
+        end)
+
+      assert output =~ "[Openmft.UiTest.MissingPublic]"
+      assert output =~ "data_table -> action -> read"
+      assert output =~ "public attribute :description is not a defined or excluded column"
+    end
+
+    test "detect empty default sort" do
+      output =
+        capture_io(:stderr, fn ->
+          defmodule EmptySort do
+            use Openmft.Ui, resource: TestCompany
+
+            data_table do
+              action :read do
+                default_sort []
+                exclude([:id])
+                column(:name)
+                column(:description)
+                column(:status)
+              end
+            end
+          end
+        end)
+
+      assert output =~ "[Openmft.UiTest.EmptySort]"
+      assert output =~ "default_sort"
+      assert output =~ "must sort on at least one column"
+    end
+
+    test "detect empty default display" do
+      output =
+        capture_io(:stderr, fn ->
+          defmodule EmptyDisplay do
+            use Openmft.Ui, resource: TestCompany
+
+            data_table do
+              action :read do
+                default_display([])
+                exclude([:id])
+                column(:name)
+                column(:description)
+                column(:status)
+              end
+            end
+          end
+        end)
+
+      assert output =~ "[Openmft.UiTest.EmptyDisplay]"
+      assert output =~ "default_display"
+      assert output =~ "must display at least one column by default"
+    end
+
+    test "detect invalid default display column" do
+      output =
+        capture_io(:stderr, fn ->
+          defmodule InvalidDisplay do
+            use Openmft.Ui, resource: TestCompany
+
+            data_table do
+              action :read do
+                default_display([:name, :bogus])
+                exclude([:id])
+                column(:name)
+                column(:description)
+                column(:status)
+              end
+            end
+          end
+        end)
+
+      assert output =~ "[Openmft.UiTest.InvalidDisplay]"
+      assert output =~ "default_display"
+      assert output =~ ":bogus is an undefined or excluded column"
     end
   end
 end

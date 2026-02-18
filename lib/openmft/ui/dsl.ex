@@ -69,7 +69,8 @@ defmodule Openmft.Ui.Dsl do
       __MODULE__.Verifiers.Form.NoDuplicateActions,
       __MODULE__.Verifiers.Form.NoDuplicateFields,
       __MODULE__.Verifiers.Form.NoDuplicateFieldLabels,
-      __MODULE__.Verifiers.Form.ExactlyOneAutofocus
+      __MODULE__.Verifiers.Form.ExactlyOneAutofocus,
+      __MODULE__.Verifiers.Form.ValidSelectOptions
     ],
     persisters: [
       __MODULE__.Persisters.DataTable,

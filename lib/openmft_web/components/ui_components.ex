@@ -115,6 +115,7 @@ defmodule OpenmftWeb.UiComponents do
   attr :action, :atom, required: true
   attr :form, :any, required: true
   attr :id, :string, default: nil
+  attr :options, :map, default: %{}
   attr :on_submit, :string, default: "save"
   attr :on_validate, :string, default: "validate"
 
@@ -135,7 +136,7 @@ defmodule OpenmftWeb.UiComponents do
       phx-submit={@on_submit}
       class={@config.class}
     >
-      <.ui_form_fields fields={@config.fields} form={@form} />
+      <.ui_form_fields fields={@config.fields} form={@form} options={@options} />
       <div class="mt-4 flex justify-end gap-2">
         <.button type="submit" variant="primary">{@config.label}</.button>
       </div>
@@ -146,16 +147,33 @@ defmodule OpenmftWeb.UiComponents do
   @doc false
   attr :fields, :list, required: true
   attr :form, :any, required: true
+  attr :options, :map, default: %{}
 
   def ui_form_fields(assigns) do
     ~H"""
     <div :for={field <- @fields}>
-      {render_field(field, @form)}
+      {render_field(field, @form, @options)}
     </div>
     """
   end
 
-  defp render_field(%Field{} = field, form) do
+  defp render_field(%Field{type: :select} = field, form, options) do
+    merged_options = field.options || Map.get(options, field.name, [])
+    assigns = %{field: field, form: form, options: merged_options}
+
+    ~H"""
+    <.input
+      field={@form[@field.name]}
+      label={@field.label}
+      type="select"
+      options={@options}
+      prompt="Select..."
+      autofocus={@field.autofocus}
+    />
+    """
+  end
+
+  defp render_field(%Field{} = field, form, _options) do
     assigns = %{field: field, form: form}
 
     ~H"""
@@ -168,20 +186,19 @@ defmodule OpenmftWeb.UiComponents do
     """
   end
 
-  defp render_field(%FieldGroup{} = group, form) do
-    assigns = %{group: group, form: form}
+  defp render_field(%FieldGroup{} = group, form, options) do
+    assigns = %{group: group, form: form, options: options}
 
     ~H"""
     <fieldset class={["fieldset", @group.class]}>
       <legend :if={@group.label} class="fieldset-legend">{@group.label}</legend>
       <div :for={field <- @group.fields}>
-        {render_field(field, @form)}
+        {render_field(field, @form, @options)}
       </div>
     </fieldset>
     """
   end
 
   defp input_type(%Field{type: :long_text}), do: "textarea"
-  defp input_type(%Field{type: :select}), do: "select"
   defp input_type(%Field{type: _}), do: "text"
 end

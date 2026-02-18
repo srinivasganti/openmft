@@ -3,18 +3,21 @@ defmodule OpenmftWeb.ConnectionLive.Index do
 
   alias Openmft.Partners
   alias Openmft.Partners.Connection
+  alias Openmft.Ui.Info
 
   @ui Connection.Page
 
   @impl true
   def mount(_params, _session, socket) do
     connections = Ash.read!(Connection, action: :read)
+    select_options = Info.load_select_options(@ui, :create, domain: Partners)
 
     {:ok,
      socket
      |> assign(:page_title, "Connections")
      |> assign(:ui, @ui)
-     |> assign(:connections, connections)}
+     |> assign(:connections, connections)
+     |> assign(:select_options, select_options)}
   end
 
   @impl true

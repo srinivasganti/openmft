@@ -669,4 +669,77 @@ defmodule Openmft.UiTest do
       assert output =~ ":bogus is an undefined or excluded column"
     end
   end
+
+  # --- Select field tests ---
+
+  describe "select field auto-detection" do
+    test "enum fields get type :select with options populated" do
+      form = Openmft.Ui.Info.form_for(CompanyPage, :create)
+      status_field = Enum.find(form.fields, &(&1.name == :status))
+
+      assert status_field.type == :select
+      assert status_field.options == [{"Active", :active}, {"Inactive", :inactive}]
+      assert status_field.relationship == nil
+    end
+
+    test "relationship fields get type :select with relationship set" do
+      form = Openmft.Ui.Info.form_for(AccountPage, :create)
+      company_field = Enum.find(form.fields, &(&1.name == :company_id))
+
+      assert company_field.type == :select
+      assert company_field.relationship == :company
+      assert company_field.options == nil
+    end
+
+    test "regular fields remain type :default" do
+      form = Openmft.Ui.Info.form_for(CompanyPage, :create)
+      name_field = Enum.find(form.fields, &(&1.name == :name))
+
+      assert name_field.type == :default
+      assert name_field.options == nil
+      assert name_field.relationship == nil
+    end
+
+    test "persisted form_select_fields contains relationship metadata" do
+      select_fields = Openmft.Ui.Info.relationship_select_fields(AccountPage, :create)
+
+      assert select_fields == %{
+               company_id: %{relationship: :company, option_label: :name}
+             }
+    end
+
+    test "persisted form_select_fields is empty for resources without relationships" do
+      select_fields = Openmft.Ui.Info.relationship_select_fields(CompanyPage, :create)
+
+      assert select_fields == %{}
+    end
+  end
+
+  describe "select field verifiers" do
+    test "detect select with neither options nor relationship" do
+      output =
+        capture_io(:stderr, fn ->
+          defmodule SelectNoOptions do
+            use Openmft.Ui, resource: TestCompany
+
+            form do
+              action :create do
+                field :name, autofocus: true, type: :select, options: [{"A", :a}]
+                field :description, type: :select
+                field :status
+              end
+
+              action :update do
+                field :name, autofocus: true
+                field :description
+                field :status
+              end
+            end
+          end
+        end)
+
+      assert output =~ "[Openmft.UiTest.SelectNoOptions]"
+      assert output =~ "select field :description has neither options nor relationship"
+    end
+  end
 end

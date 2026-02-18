@@ -1,0 +1,35 @@
+<.header>
+  Accounts
+  <:actions>
+    <.button patch={~p"/accounts/new"} variant="primary">New Account</.button>
+  </:actions>
+</.header>
+
+<.ui_data_table
+  ui={@ui}
+  action={:read}
+  rows={@accounts}
+  row_click={fn account -> JS.patch(~p"/accounts/#{account.id}/edit") end}
+>
+  <:row_action :let={account}>
+    <.button
+      phx-click="delete"
+      phx-value-id={account.id}
+      data-confirm="Are you sure?"
+    >
+      Delete
+    </.button>
+  </:row_action>
+</.ui_data_table>
+
+<div :if={@form} class="mt-8">
+  <.header>
+    {@page_title}
+  </.header>
+
+  <.ui_form ui={@ui} action={@form_action} form={@form} />
+
+  <div class="mt-2">
+    <.button patch={~p"/accounts"}>Cancel</.button>
+  </div>
+</div>

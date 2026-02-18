@@ -181,6 +181,14 @@ defmodule Openmft.UiTest do
   end
 
   describe "form pipeline" do
+    test "form persisted lookup works" do
+      form = Openmft.Ui.Info.form_for(CompanyPage, :create)
+
+      assert form != nil
+      assert form.name == :create
+      assert form.label == "Create"
+    end
+
     test "form fields have correct auto-generated labels" do
       form = Openmft.Ui.Info.form_for(CompanyPage, :create)
       labels = Enum.map(form.fields, & &1.label)

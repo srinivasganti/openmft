@@ -72,6 +72,7 @@ defmodule Openmft.Ui.Dsl do
       __MODULE__.Verifiers.Form.ExactlyOneAutofocus
     ],
     persisters: [
-      __MODULE__.Persisters.DataTable
+      __MODULE__.Persisters.DataTable,
+      __MODULE__.Persisters.Form
     ]
 end

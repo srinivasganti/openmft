@@ -86,6 +86,7 @@ defmodule OpenmftWeb do
       import Phoenix.HTML
       # Core UI components
       import OpenmftWeb.CoreComponents
+      import OpenmftWeb.UiComponents
 
       # Common modules used in templates
       alias Phoenix.LiveView.JS

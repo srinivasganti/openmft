@@ -18,6 +18,10 @@ defmodule OpenmftWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
+
+    live "/companies", CompanyLive.Index, :index
+    live "/companies/new", CompanyLive.Index, :new
+    live "/companies/:id/edit", CompanyLive.Index, :edit
   end
 
   # Other scopes may use custom stacks.

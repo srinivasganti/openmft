@@ -9,15 +9,14 @@ defmodule Openmft.Ui.Info do
   alias Spark.Dsl.Extension
 
   @doc """
-  Returns the form fields defined for the given action.
+  Returns the form action defined for the given action name.
+  Uses O(1) persisted lookup map.
   """
   @spec form_for(Openmft.Ui.t(), atom()) :: Action.t() | nil
   def form_for(ui_module, action_name) do
     ui_module
-    |> Extension.get_entities([:form])
-    |> Enum.find(fn action ->
-      action.name == action_name
-    end)
+    |> Extension.get_persisted(:form_actions_by_name, %{})
+    |> Map.get(action_name)
   end
 
   @doc """

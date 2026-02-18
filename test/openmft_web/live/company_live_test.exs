@@ -146,15 +146,51 @@ defmodule OpenmftWeb.CompanyLiveTest do
       assert html =~ "Accounts"
     end
 
-    test "deletes a company", %{conn: conn, company: company} do
+    test "cannot delete an active company", %{conn: conn, company: company} do
       {:ok, view, _html} = live(conn, ~p"/companies")
 
+      # Delete button is disabled for active companies
+      assert has_element?(
+               view,
+               ~s|button[phx-click="delete"][phx-value-id="#{company.id}"][disabled]|
+             )
+    end
+
+    test "deletes a company after disabling it", %{conn: conn, company: company} do
+      {:ok, view, _html} = live(conn, ~p"/companies")
+
+      # First disable the company
+      view
+      |> element(~s|button[phx-click="toggle-status"][phx-value-id="#{company.id}"]|)
+      |> render_click()
+
+      # Now delete should work
       view
       |> element(~s|button[phx-click="delete"][phx-value-id="#{company.id}"]|)
       |> render_click()
 
       html = render(view)
       refute html =~ company.name
+    end
+
+    test "toggles company status", %{conn: conn, company: company} do
+      {:ok, view, _html} = live(conn, ~p"/companies")
+
+      # Company starts as active — toggle to inactive
+      view
+      |> element(~s|button[phx-click="toggle-status"][phx-value-id="#{company.id}"]|)
+      |> render_click()
+
+      # Should show inactive icon (hero-x-circle)
+      assert has_element?(view, ~s|span[class*="hero-x-circle"]|)
+
+      # Toggle back to active
+      view
+      |> element(~s|button[phx-click="toggle-status"][phx-value-id="#{company.id}"]|)
+      |> render_click()
+
+      # Should show active icon (hero-check-circle-solid)
+      assert has_element?(view, ~s|span[class*="hero-check-circle-solid"]|)
     end
 
     test "sorts by column ascending", %{conn: conn} do

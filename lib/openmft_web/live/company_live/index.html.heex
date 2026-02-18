@@ -17,15 +17,53 @@
   row_click={fn company -> JS.navigate(~p"/companies/#{company.id}") end}
 >
   <:row_action :let={company}>
-    <a href={~p"/companies/#{company.id}"} class="btn btn-ghost btn-xs">View</a>
-    <a href={~p"/companies/#{company.id}/edit"} class="btn btn-ghost btn-xs">Edit</a>
-    <.button
-      phx-click="delete"
-      phx-value-id={company.id}
-      data-confirm="Are you sure?"
-    >
-      Delete
-    </.button>
+    <div class="flex items-center gap-1">
+      <a
+        href={~p"/companies/#{company.id}"}
+        class="btn btn-ghost btn-xs btn-square tooltip"
+        data-tip="View"
+      >
+        <.icon name="hero-eye" class="size-4" />
+      </a>
+      <a
+        href={~p"/companies/#{company.id}/edit"}
+        class="btn btn-ghost btn-xs btn-square tooltip"
+        data-tip="Edit"
+      >
+        <.icon name="hero-pencil-square" class="size-4" />
+      </a>
+      <button
+        type="button"
+        phx-click="toggle-status"
+        phx-value-id={company.id}
+        class="btn btn-ghost btn-xs btn-square tooltip"
+        data-tip={if company.status == :active, do: "Disable", else: "Enable"}
+      >
+        <.icon
+          name={
+            if company.status == :active, do: "hero-check-circle-solid", else: "hero-x-circle"
+          }
+          class={[
+            "size-4",
+            if(company.status == :active, do: "text-success", else: "text-base-content/30")
+          ]}
+        />
+      </button>
+      <button
+        type="button"
+        phx-click="delete"
+        phx-value-id={company.id}
+        data-confirm="Are you sure you want to delete this company?"
+        disabled={company.status == :active}
+        class={[
+          "btn btn-ghost btn-xs btn-square tooltip",
+          if(company.status == :active, do: "btn-disabled opacity-30", else: "text-error")
+        ]}
+        data-tip={if company.status == :active, do: "Disable first to delete", else: "Delete"}
+      >
+        <.icon name="hero-trash" class="size-4" />
+      </button>
+    </div>
   </:row_action>
 </.ui_data_table>
 

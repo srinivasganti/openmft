@@ -90,14 +90,34 @@ defmodule OpenmftWeb.CompanyLive.Index do
   end
 
   @impl true
-  def handle_event("delete", %{"id" => id}, socket) do
+  def handle_event("toggle-status", %{"id" => id}, socket) do
     company = Ash.get!(Company, id)
-    Ash.destroy!(company)
+    new_status = if company.status == :active, do: :inactive, else: :active
+
+    company
+    |> Ash.Changeset.for_update(:update, %{status: new_status}, domain: Partners)
+    |> Ash.update!()
 
     {:noreply,
      socket
-     |> put_flash(:info, "Company deleted")
+     |> put_flash(:info, "Company #{new_status}")
      |> assign(:companies, load_companies(socket))}
+  end
+
+  @impl true
+  def handle_event("delete", %{"id" => id}, socket) do
+    company = Ash.get!(Company, id)
+
+    if company.status == :active do
+      {:noreply, put_flash(socket, :error, "Disable the company before deleting")}
+    else
+      Ash.destroy!(company)
+
+      {:noreply,
+       socket
+       |> put_flash(:info, "Company deleted")
+       |> assign(:companies, load_companies(socket))}
+    end
   end
 
   @impl true

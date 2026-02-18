@@ -13,7 +13,7 @@ defmodule OpenmftWeb.ColumnToggle do
   @spec init(module(), atom()) :: keyword()
   def init(ui_module, action) do
     config = Info.data_table_for(ui_module, action)
-    all_columns = Map.keys(config.columns)
+    all_columns = config.column_order
     visible = config.default_display
 
     [visible_columns: visible, all_columns: all_columns]

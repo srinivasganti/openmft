@@ -128,10 +128,13 @@ defmodule Openmft.Ui.Dsl.Transformers.MergeDataTableActions do
             )
     end
 
+    column_order = Enum.map(action.columns, & &1.name)
+
     action
     |> Map.put(:label, action.label || default_label(name))
     |> Map.put(:class, action.class || context.default_class)
     |> expand_action_description(resource_action, context)
+    |> Map.put(:column_order, column_order)
     |> Map.put(:columns, merge_columns(action.columns, context))
   end
 

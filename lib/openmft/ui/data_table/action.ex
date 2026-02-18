@@ -25,6 +25,11 @@ defmodule Openmft.Ui.DataTable.Action do
         doc: "The description for this data table.",
         type: Openmft.Dsl.Type.inheritable(:string)
       ],
+      column_order: [
+        doc: "The DSL-declared column order (set by transformer).",
+        type: {:list, :atom},
+        hide: [:docs]
+      ],
       exclude: [
         default: [],
         doc: "The fields to exclude from columns.",

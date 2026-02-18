@@ -106,7 +106,11 @@ lib/openmft/
     company/
       page.ex                           # Company UI config (form + data_table DSL)
     account.ex                          # Account resource (belongs_to company, has_many connections)
+    account/
+      page.ex                           # Account UI config (form + data_table DSL)
     connection.ex                       # Connection resource (belongs_to account)
+    connection/
+      page.ex                           # Connection UI config (form + data_table DSL)
   ui.ex                                 # Main Spark.Dsl entry point
   ui/
     info.ex                             # Introspection API (O(1) persisted lookups)
@@ -158,6 +162,12 @@ lib/openmft_web/
     company_live/
       index.ex                          # Company CRUD LiveView
       index.html.heex                   # Template using ui_data_table + ui_form
+    account_live/
+      index.ex                          # Account CRUD LiveView
+      index.html.heex                   # Template using ui_data_table + ui_form
+    connection_live/
+      index.ex                          # Connection CRUD LiveView
+      index.html.heex                   # Template using ui_data_table + ui_form
 ```
 
 ### Testing Patterns
@@ -167,4 +177,4 @@ lib/openmft_web/
 - **LiveView tests** use `ConnCase` + `Phoenix.LiveViewTest` with Postgres sandbox
 - Flash messages render in layout, not LiveView — test data effects instead
 - DSL tests: `test/openmft/ui_test.exs`
-- LiveView tests: `test/openmft_web/live/company_live_test.exs`
+- LiveView tests: `test/openmft_web/live/{company,account,connection}_live_test.exs`

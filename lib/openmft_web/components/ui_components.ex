@@ -36,6 +36,9 @@ defmodule OpenmftWeb.UiComponents do
   attr :row_click, :any, default: nil
   attr :visible_columns, :list, default: nil
   attr :all_columns, :list, default: nil
+  attr :sort, :list, default: nil
+  attr :search_term, :string, default: nil
+  attr :on_search, :string, default: nil
 
   slot :row_action, doc: "per-row action buttons"
 
@@ -67,15 +70,34 @@ defmodule OpenmftWeb.UiComponents do
       |> assign(:all_column_structs, all_column_structs)
 
     ~H"""
-    <.column_toggle_dropdown
-      :if={@all_column_structs}
-      all_columns={@all_column_structs}
-      visible_columns={@visible_columns}
-    />
+    <div class="flex items-center justify-between gap-2 mb-2">
+      <.search_bar :if={@on_search} search_term={@search_term} on_search={@on_search} />
+      <div class="flex gap-2">
+        <.column_toggle_dropdown
+          :if={@all_column_structs}
+          all_columns={@all_column_structs}
+          visible_columns={@visible_columns}
+        />
+      </div>
+    </div>
     <table class={["table table-zebra", @config.class]}>
       <thead>
         <tr>
-          <th :for={col <- @columns}>{col.label}</th>
+          <th :for={col <- @columns}>
+            <%= if col.sortable? and @sort != nil do %>
+              <button
+                type="button"
+                phx-click="sort-column"
+                phx-value-column={col.name}
+                class="inline-flex items-center gap-1 cursor-pointer hover:text-primary"
+              >
+                {col.label}
+                <.sort_indicator direction={sort_direction_for(@sort, col.name)} />
+              </button>
+            <% else %>
+              {col.label}
+            <% end %>
+          </th>
           <th :if={@row_action != []}>
             <span class="sr-only">Actions</span>
           </th>
@@ -100,6 +122,68 @@ defmodule OpenmftWeb.UiComponents do
       </tbody>
     </table>
     """
+  end
+
+  attr :search_term, :string, required: true
+  attr :on_search, :string, required: true
+
+  defp search_bar(assigns) do
+    ~H"""
+    <form phx-change={@on_search} class="flex-1 max-w-sm">
+      <div class="relative">
+        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40">
+          <.icon name="hero-magnifying-glass" class="size-4" />
+        </span>
+        <input
+          type="text"
+          name="search_term"
+          value={@search_term}
+          placeholder="Search..."
+          phx-debounce="300"
+          class="input input-bordered input-sm w-full pl-9 pr-8"
+        />
+        <button
+          :if={@search_term != "" and @search_term != nil}
+          type="button"
+          phx-click="clear-search"
+          class="absolute right-2 top-1/2 -translate-y-1/2 btn btn-ghost btn-xs btn-circle"
+          aria-label="Clear search"
+        >
+          <.icon name="hero-x-mark" class="size-3" />
+        </button>
+      </div>
+    </form>
+    """
+  end
+
+  attr :direction, :atom, required: true
+
+  defp sort_indicator(%{direction: nil} = assigns) do
+    ~H"""
+    <span class="text-base-content/30">
+      <.icon name="hero-chevron-up-down" class="size-3" />
+    </span>
+    """
+  end
+
+  defp sort_indicator(%{direction: :asc} = assigns) do
+    ~H"""
+    <span class="text-primary">
+      <.icon name="hero-chevron-up" class="size-3" />
+    </span>
+    """
+  end
+
+  defp sort_indicator(%{direction: :desc} = assigns) do
+    ~H"""
+    <span class="text-primary">
+      <.icon name="hero-chevron-down" class="size-3" />
+    </span>
+    """
+  end
+
+  defp sort_direction_for(sort, column_name) do
+    Keyword.get(sort, column_name)
   end
 
   attr :all_columns, :list, required: true

@@ -19,6 +19,7 @@ defmodule Openmft.Partners.Company.Page do
   data_table do
     action_type :read do
       default_display([:name, :email, :phone_number, :updated_at])
+      default_sort([{:name, :asc}])
       exclude([:id])
       column(:name)
       column(:email)

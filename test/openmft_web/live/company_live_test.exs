@@ -148,5 +148,68 @@ defmodule OpenmftWeb.CompanyLiveTest do
       html = render(view)
       refute html =~ company.name
     end
+
+    test "sorts by column ascending", %{conn: conn} do
+      Company
+      |> Ash.Changeset.for_create(:create, %{name: "Zebra Corp"})
+      |> Ash.create!()
+
+      {:ok, view, _html} = live(conn, ~p"/companies")
+
+      # Default sort is name:asc, Acme should be before Zebra
+      html = render(view)
+      acme_pos = :binary.match(html, "Acme Corp") |> elem(0)
+      zebra_pos = :binary.match(html, "Zebra Corp") |> elem(0)
+      assert acme_pos < zebra_pos
+    end
+
+    test "sorts descending on second click", %{conn: conn} do
+      Company
+      |> Ash.Changeset.for_create(:create, %{name: "Zebra Corp"})
+      |> Ash.create!()
+
+      {:ok, view, _html} = live(conn, ~p"/companies")
+
+      # Click name to cycle: asc (default) -> desc
+      view
+      |> element(~s|button[phx-click="sort-column"][phx-value-column="name"]|)
+      |> render_click()
+
+      html = render(view)
+      acme_pos = :binary.match(html, "Acme Corp") |> elem(0)
+      zebra_pos = :binary.match(html, "Zebra Corp") |> elem(0)
+      assert zebra_pos < acme_pos
+    end
+
+    test "search filters companies", %{conn: conn} do
+      Company
+      |> Ash.Changeset.for_create(:create, %{name: "Zebra Corp"})
+      |> Ash.create!()
+
+      {:ok, view, _html} = live(conn, ~p"/companies")
+
+      view |> form("form[phx-change=search]", %{search_term: "Acme"}) |> render_change()
+
+      html = render(view)
+      assert html =~ "Acme Corp"
+      refute html =~ "Zebra Corp"
+    end
+
+    test "clear search shows all companies", %{conn: conn} do
+      Company
+      |> Ash.Changeset.for_create(:create, %{name: "Zebra Corp"})
+      |> Ash.create!()
+
+      {:ok, view, _html} = live(conn, ~p"/companies")
+
+      view |> form("form[phx-change=search]", %{search_term: "Acme"}) |> render_change()
+      refute render(view) =~ "Zebra Corp"
+
+      view |> element(~s|button[phx-click="clear-search"]|) |> render_click()
+
+      html = render(view)
+      assert html =~ "Acme Corp"
+      assert html =~ "Zebra Corp"
+    end
   end
 end

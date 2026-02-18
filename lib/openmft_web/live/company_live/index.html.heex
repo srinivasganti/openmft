@@ -11,6 +11,9 @@
   rows={@companies}
   visible_columns={@visible_columns}
   all_columns={@all_columns}
+  sort={@sort}
+  search_term={@search_term}
+  on_search="search"
   row_click={fn company -> JS.patch(~p"/companies/#{company.id}/edit") end}
 >
   <:row_action :let={company}>
